@@ -1,14 +1,76 @@
-datasource db {
-  provider      = "mysql"
-  url           = env("DATABASE_URL")
-  relationMode  = "prisma"
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-model File {
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model MerkleTrees {
+  id            Int     @id @default(autoincrement())
+  root          String? @db.VarChar(255)
+  address       String? @db.VarChar(255)
+  token_address String? @db.VarChar(255)
+  amount        String? @db.VarChar(255)
+  hash1         String? @db.VarChar(66)
+  hash2         String? @db.VarChar(66)
+  hash3         String? @db.VarChar(66)
+  hash4         String? @db.VarChar(66)
+  hash5         String? @db.VarChar(66)
+  hash6         String? @db.VarChar(66)
+  hash7         String? @db.VarChar(66)
+  hash8         String? @db.VarChar(66)
+  hash9         String? @db.VarChar(66)
+  hash10        String? @db.VarChar(66)
+  hash11        String? @db.VarChar(66)
+  hash12        String? @db.VarChar(66)
+}
+
+model auth {
+  address String  @id @db.VarChar(256)
+  HASH    String? @db.VarChar(256)
+}
+
+model pending_withdrawals {
+  id            Int      @id @default(autoincrement())
+  address       String   @db.VarChar(256)
+  token_address String   @db.VarChar(256)
+  amount        String?  @db.VarChar(256)
+  pending       Boolean?
+}
+
+model pending_withdrawals_test {
+  id            Int      @id @default(autoincrement())
+  address       String?  @db.VarChar(255)
+  token_address String?  @db.VarChar(255)
+  amount        String?  @db.VarChar(255)
+  root          String?  @db.VarChar(255)
+  txHash        String?  @db.VarChar(255)
+  pending       Boolean?
+}
+
+model tokens {
+  address  String  @id @db.VarChar(256)
+  name     String? @db.VarChar(256)
+  symbol   String? @db.VarChar(256)
+  decimals Int?
+}
+
+model tokens_balances {
+  address       String  @db.VarChar(255)
+  token_address String  @db.VarChar(255)
+  balance       String? @db.VarChar(255)
+
+  @@id([address, token_address])
+}
+
+model users {
+  address String  @id @db.VarChar(255)
+  balance String? @db.VarChar(255)
+}
+model FileRecord {
   id   String @id @unique @default(cuid())
   blob Bytes
 
@@ -18,7 +80,7 @@ model File {
 }
 
 model Image {
-  file   File   @relation(fields: [fileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  file   FileRecord   @relation(fields: [fileId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   fileId String @unique
 
   contentType String
@@ -128,3 +190,4 @@ model Note {
   // so indexing on the owner ID helps with that (a LOT).
   @@index([ownerId, updatedAt(sort: Desc)])
 }
+
