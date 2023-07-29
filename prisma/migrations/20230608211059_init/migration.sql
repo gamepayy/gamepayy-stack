@@ -1,155 +1,82 @@
 -- CreateTable
-CREATE TABLE "File" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "blob" BLOB NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
-);
+CREATE TABLE `MerkleTrees` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `root` VARCHAR(255) NULL,
+    `address` VARCHAR(255) NULL,
+    `token_address` VARCHAR(255) NULL,
+    `amount` VARCHAR(255) NULL,
+    `hash1` VARCHAR(66) NULL,
+    `hash2` VARCHAR(66) NULL,
+    `hash3` VARCHAR(66) NULL,
+    `hash4` VARCHAR(66) NULL,
+    `hash5` VARCHAR(66) NULL,
+    `hash6` VARCHAR(66) NULL,
+    `hash7` VARCHAR(66) NULL,
+    `hash8` VARCHAR(66) NULL,
+    `hash9` VARCHAR(66) NULL,
+    `hash10` VARCHAR(66) NULL,
+    `hash11` VARCHAR(66) NULL,
+    `hash12` VARCHAR(66) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE "Image" (
-    "fileId" TEXT NOT NULL,
-    "contentType" TEXT NOT NULL,
-    "altText" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Image_fileId_fkey" FOREIGN KEY ("fileId") REFERENCES "File" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-);
+CREATE TABLE `auth` (
+    `address` VARCHAR(256) NOT NULL,
+    `HASH` VARCHAR(256) NULL,
+
+    PRIMARY KEY (`address`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE "Role" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
-);
+CREATE TABLE `pending_withdrawals` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `address` VARCHAR(256) NOT NULL,
+    `token_address` VARCHAR(256) NOT NULL,
+    `amount` VARCHAR(256) NULL,
+    `pending` BOOLEAN NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE "Permission" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
-);
+CREATE TABLE `pending_withdrawals_test` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `address` VARCHAR(255) NULL,
+    `token_address` VARCHAR(255) NULL,
+    `amount` VARCHAR(255) NULL,
+    `root` VARCHAR(255) NULL,
+    `txHash` VARCHAR(255) NULL,
+    `pending` BOOLEAN NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE "User" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "email" TEXT NOT NULL,
-    "username" TEXT NOT NULL,
-    "name" TEXT,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    "imageId" TEXT,
-    CONSTRAINT "User_imageId_fkey" FOREIGN KEY ("imageId") REFERENCES "Image" ("fileId") ON DELETE SET NULL ON UPDATE CASCADE
-);
+CREATE TABLE `tokens` (
+    `address` VARCHAR(256) NOT NULL,
+    `name` VARCHAR(256) NULL,
+    `symbol` VARCHAR(256) NULL,
+    `decimals` INTEGER NULL,
+
+    PRIMARY KEY (`address`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE "Password" (
-    "hash" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    CONSTRAINT "Password_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-);
+CREATE TABLE `tokens_balances` (
+    `address` VARCHAR(255) NOT NULL,
+    `token_address` VARCHAR(255) NOT NULL,
+    `balance` VARCHAR(255) NULL,
+
+    PRIMARY KEY (`address`, `token_address`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE "Verification" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "type" TEXT NOT NULL,
-    "target" TEXT NOT NULL,
-    "secret" TEXT NOT NULL,
-    "algorithm" TEXT NOT NULL,
-    "digits" INTEGER NOT NULL,
-    "period" INTEGER NOT NULL,
-    "expiresAt" DATETIME
-);
+CREATE TABLE `users` (
+    `address` VARCHAR(255) NOT NULL,
+    `balance` VARCHAR(255) NULL,
 
--- CreateTable
-CREATE TABLE "Session" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "userId" TEXT NOT NULL,
-    "expirationDate" DATETIME NOT NULL,
-    CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-);
+    PRIMARY KEY (`address`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- CreateTable
-CREATE TABLE "Note" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "title" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    "ownerId" TEXT NOT NULL,
-    CONSTRAINT "Note_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-);
-
--- CreateTable
-CREATE TABLE "_RoleToUser" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL,
-    CONSTRAINT "_RoleToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Role" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "_RoleToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-);
-
--- CreateTable
-CREATE TABLE "_PermissionToRole" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL,
-    CONSTRAINT "_PermissionToRole_A_fkey" FOREIGN KEY ("A") REFERENCES "Permission" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT "_PermissionToRole_B_fkey" FOREIGN KEY ("B") REFERENCES "Role" ("id") ON DELETE CASCADE ON UPDATE CASCADE
-);
-
--- CreateIndex
-CREATE UNIQUE INDEX "File_id_key" ON "File"("id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Image_fileId_key" ON "Image"("fileId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Role_id_key" ON "Role"("id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Permission_id_key" ON "Permission"("id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Permission_name_key" ON "Permission"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_id_key" ON "User"("id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_imageId_key" ON "User"("imageId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Password_userId_key" ON "Password"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Verification_target_type_key" ON "Verification"("target", "type");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Note_id_key" ON "Note"("id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "_RoleToUser_AB_unique" ON "_RoleToUser"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_RoleToUser_B_index" ON "_RoleToUser"("B");
-
--- CreateIndex
-CREATE UNIQUE INDEX "_PermissionToRole_AB_unique" ON "_PermissionToRole"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_PermissionToRole_B_index" ON "_PermissionToRole"("B");
-
--- CreateIndex
-CREATE INDEX "Note_ownerId_updatedAt_idx" ON "Note"("ownerId", "updatedAt" DESC);
