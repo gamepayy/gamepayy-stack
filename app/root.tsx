@@ -1,4 +1,5 @@
 import { cssBundleHref } from '@remix-run/css-bundle'
+
 import {
 	json,
 	type DataFunctionArgs,
@@ -20,7 +21,7 @@ import {
 	useSubmit,
 } from '@remix-run/react'
 import { withSentry } from '@sentry/remix'
-import { Suspense, lazy, useRef } from 'react'
+import { Suspense, lazy, useRef, useState } from 'react'
 import { Confetti } from './components/confetti.tsx'
 import { GeneralErrorBoundary } from './components/error-boundary.tsx'
 import { SearchBar } from './components/search-bar.tsx'
@@ -48,6 +49,28 @@ import { useNonce } from './utils/nonce-provider.ts'
 import { makeTimings, time } from './utils/timing.server.ts'
 import { useToast } from './utils/useToast.tsx'
 import { useOptionalUser, useUser } from './utils/user.ts'
+
+// web3 tools
+import { configureChains, createConfig, WagmiConfig } from 'wagmi'
+
+import {
+	mainnet,
+	polygon,
+	optimism,
+	arbitrum,
+	zora,
+	goerli,
+} from 'wagmi/chains'
+import { publicProvider } from 'wagmi/providers/public'
+import type { Chain } from 'wagmi'
+import {
+	RainbowKitProvider,
+	ConnectButton,
+	getDefaultWallets,
+} from '@rainbow-me/rainbowkit'
+
+import rainbowStylesUrl from '@rainbow-me/rainbowkit/styles.css'
+
 import rdtStylesheetUrl from 'remix-development-tools/stylesheet.css'
 const RemixDevTools =
 	process.env.NODE_ENV === 'development'
@@ -81,6 +104,9 @@ export const links: LinksFunction = () => {
 		{ rel: 'icon', type: 'image/svg+xml', href: '/favicons/favicon.svg' },
 		{ rel: 'stylesheet', href: fontStylestylesheetUrl },
 		{ rel: 'stylesheet', href: tailwindStylesheetUrl },
+
+		{ rel: 'stylesheet', href: rainbowStylesUrl },
+
 		cssBundleHref ? { rel: 'stylesheet', href: cssBundleHref } : null,
 		rdtStylesheetUrl && process.env.NODE_ENV === 'development'
 			? { rel: 'stylesheet', href: rdtStylesheetUrl }
@@ -196,6 +222,33 @@ function App() {
 	const isOnSearchPage = matches.find(m => m.id === 'routes/users+/index')
 	useToast(data.flash?.toast)
 
+	const [{ config, chains }] = useState(() => {
+		const testChains =
+			data.ENV.PUBLIC_ENABLE_TESTNETS === 'true' ? [goerli] : []
+
+		const { chains, publicClient } = configureChains(
+			[mainnet, polygon, optimism, arbitrum, zora, ...testChains],
+			[publicProvider()],
+		)
+
+		const { connectors } = getDefaultWallets({
+			appName: 'RainbowKit Remix Example',
+			projectId: 'YOUR_PROJECT_ID',
+			chains,
+		})
+
+		const config = createConfig({
+			autoConnect: true,
+			connectors,
+			publicClient,
+		})
+
+		return {
+			config,
+			chains,
+		}
+	})
+
 	return (
 		<Document nonce={nonce} theme={theme} env={data.ENV}>
 			<div className="flex h-screen flex-col justify-between">
@@ -223,7 +276,22 @@ function App() {
 				</header>
 
 				<div className="flex-1">
-					<Outlet />
+					{config && chains ? (
+						<WagmiConfig config={config}>
+							<RainbowKitProvider chains={chains as Chain[]}>
+								<div
+									style={{
+										display: 'flex',
+										justifyContent: 'flex-end',
+										padding: '12px',
+									}}
+								>
+									<ConnectButton />
+								</div>
+							</RainbowKitProvider>
+							<Outlet />
+						</WagmiConfig>
+					) : null}
 				</div>
 
 				<div className="container flex justify-between pb-5">
